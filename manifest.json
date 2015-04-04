@@ -5,10 +5,16 @@
    "content_scripts": [
       {
          "css": [
+            "vendors/webui-popover/jquery.webui-popover.css",
             "dist/main.css"
          ],
          "js": [
             "vendors/jquery/jquery.js",
+            "vendors/underscore/underscore.js",
+            "vendors/handlebars/handlebars.js",
+            "vendors/backbone/backbone.js",
+            "vendors/backbone.marionette/backbone.marionette.js",
+            "vendors/webui-popover/jquery.webui-popover.js",
             "dist/main.js"
          ],
          "matches": [
@@ -23,5 +29,8 @@
       "16": "icons/16x16.png",
       "48": "icons/48x48.png",
       "128": "icons/128x128.png"
-   }
+   },
+   "web_accessible_resources": [
+      "icons/*"
+    ]
 }

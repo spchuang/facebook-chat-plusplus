@@ -9,3 +9,8 @@ How to install
 > click "load unpacked extension..."
 > choose the folder of where this extension is located
 > extension should show up on the top right of the extension icons
+
+
+Install grunt
+----------------
+npm install grunt --save-dev

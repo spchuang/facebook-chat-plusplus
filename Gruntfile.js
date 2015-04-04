@@ -22,7 +22,7 @@ module.exports = function(grunt) {
       less: {
          build: {
             files: {
-               'dist/<%= pkg.name %>.css': 'less/main.less'
+               'dist/main.css': 'src/less/main.less'
             }
          },
       },
@@ -42,8 +42,8 @@ module.exports = function(grunt) {
             banner: '<%= banner %>'
          },
          dist: {
-            src: ['js/*.js','js/*/*.js'],
-            dest: 'dist/<%= pkg.name %>.js'
+            src: ['src/js/*.js','src/js/*/*.js'],
+            dest: 'dist/main.js'
          }
       },
       uglify: {
@@ -51,8 +51,8 @@ module.exports = function(grunt) {
             banner: '<%= banner %>'
          },
          dist: {
-            src: '<%= concat.dist.dest %>',
-            dest: 'dist/<%= pkg.name %>.min.js'
+            src: 'dist/main.js',
+            dest: 'dist/main.min.js'
          }
       }
    });
@@ -72,9 +72,9 @@ module.exports = function(grunt) {
    // ===========================================================================
    // CREATE TASKS ==============================================================
    // ===========================================================================
-   grunt.registerTask('css', ['less', 'cssmin']);
+   grunt.registerTask('css', ['less']);
 
 
-   grunt.registerTask('compile', ['css','concat'])
+   grunt.registerTask('compile', ['concat', 'css'])
 
 };
