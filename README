@@ -1,3 +1,11 @@
 Facebook-chat-plusplus
 
 This is a chrome extension that adds new features on to of Facebook's messanger.
+
+How to install
+-----------------
+> download the code
+> open Window > Extensions
+> click "load unpacked extension..."
+> choose the folder of where this extension is located
+> extension should show up on the top right of the extension icons

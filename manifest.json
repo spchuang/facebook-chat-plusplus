@@ -8,6 +8,7 @@
             "dist/main.css"
          ],
          "js": [
+            "vendors/jquery/jquery.js",
             "dist/main.js"
          ],
          "matches": [
