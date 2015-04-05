@@ -1,31 +1,25 @@
-
-var popOverTpl = '\
+var tabTpl = '\
    <div class="tabs">\
-      <span><a class = "plus-btn nudge-btn" href="#" data-toggle="tab">Nudge</a></span>\
-      <span><a class = "active sticker-btn" href="#" data-toggle="tab">Stickers</a></span>\
-      <span><a class = "encrypt-btn" href="#" data-toggle="tab">Encrypt</a></span>\
-   </div>\
-   <div class="contents">\
-      <div class="tab stickers">\
-      <span><input id="stickerSearch" type="text" placeholder="Search for Stickers"> <button type="button" id="stickerBtn">Search</button></span>\
-      <div id="stickerCont"></div>\
-      </div>\
-      <div class="tab hidden encryption">\
-         Encryption\
-      </div>\
-   </div>\
-   ';
+      <button class = "btn btn-primary plus-btn nudge-btn" >Nudge</button><br>\
+      <button class = "btn btn-primary sticker-btn" >Stickers</button><br>\
+      <button class = "btn btn-primary encrypt-btn" >Encrypt</button><br>\
+   </div>';
 
+var contentTpl = '<div class="stickers hidden"><span><img class="back-btn" height="15" width="15" src=\"' + chrome.extension.getURL("icons/back.png") + '\"><input id="stickerSearch" type="text" placeholder="Search for Stickers">    <button type="button" id="stickerBtn">Search</button></span><div id="stickerCont"></div></div>';
 
-function populateStickers(data){
+var popOverTpl = tabTpl + contentTpl;
+
+function populateStickers(data, cb){
    var stickersEl = $("#stickerCont");
    for(var i = 0; i<data['data'].length;i++){
-      stickersEl.append("<img src=\""+data['data'][i]['images']['original']['url']+"\" height=\"50\" width=\"50\">");
+      stickersEl.append("<img src=\""+ chrome.extension.getURL("icons/spinning-wheel.gif") + "\" data-src=\""+data['data'][i]['images']['fixed_height_downsampled']['url']+"\" data=\"" + data['data'][i]['images']['original']['url'] + "\"height=\"50\" width=\"50\">");
    }
+   $("img").unveil();
    $("#stickerCont").on("click", "img", function(){
-      url = $(this).attr('src');
+      url = $(this).attr('data');
       $(this).closest('.fbNubFlyoutInner').find('textarea').val(url);
    });
+   cb();
 }
 trending = [];
 chrome.extension.onMessage.addListener(function(message, sender, sendResponse) {
@@ -34,13 +28,17 @@ chrome.extension.onMessage.addListener(function(message, sender, sendResponse) {
                $(".loading").remove();
                console.log("search results:");
                console.log(message.result);
-               populateStickers(message.result);
+               populateStickers(message.result, function(){
+                  $("img").unveil(100);
+               });
                break;
             case "trendingResult":
                $(".loading").remove();
                console.log("trending results:");
                console.log(message.result);
-               populateStickers(message.result);
+               populateStickers(message.result,function(){
+                  $("img").unveil(100);
+               });
                break;
         }
 });
@@ -52,7 +50,8 @@ var ChatIconPopoverView = Marionette.LayoutView.extend({
       'click .plus-btn': 'onNudgeClick',
       'click .sticker-btn': 'onStickerClick',
       'click .encrypt-btn': 'onEncryptClick',
-      'click #stickerBtn' : 'onStickerBtn'
+      'click #stickerBtn' : 'onStickerBtn',
+      'click .back-btn' : 'back'
    },
    initialize: function(option){
       this.control = option.control;
@@ -62,6 +61,8 @@ var ChatIconPopoverView = Marionette.LayoutView.extend({
    },
 
    onStickerClick: function(){
+      $('.popover.fade.top.in').css('width', 250);
+      $(".tabs").toggle('slow');
       $("#stickerCont").empty();
       console.log("on sticker");
       $("#stickerCont").append("<img class=\"loading\" src=\"" + chrome.extension.getURL("icons/spinning-wheel.gif") + "\">");
@@ -70,9 +71,6 @@ var ChatIconPopoverView = Marionette.LayoutView.extend({
       });
       if($(".stickers").hasClass('hidden')){
          $(".stickers").removeClass('hidden');
-      }
-      if(!$(".encryption").hasClass('hidden')){
-         $(".encryption").addClass('hidden');
       }
    },
 
@@ -95,6 +93,12 @@ var ChatIconPopoverView = Marionette.LayoutView.extend({
       if(!$(".stickers").hasClass('hidden')){
          $(".stickers").addClass('hidden');
       }
+   },
+
+   back: function(){
+      $('.popover.fade.top.in').css('width', 150);
+      $(".tabs").toggle('slide');
+      $(".stickers").addClass('hidden');
    }
 });
 

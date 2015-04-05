@@ -17,6 +17,7 @@
             "vendors/backbone/backbone.js",
             "vendors/backbone.marionette/backbone.marionette.js",
             "vendors/webui-popover/jquery.webui-popover.js",
+            "vendors/unveil/jquery.unveil.js",
             "dist/main.js"
          ],
          "matches": [
