@@ -53,21 +53,6 @@ var ChatIconView = Marionette.LayoutView.extend({
 
 var App = new Backbone.Marionette.Application();
 
-jQuery.fn.shake = function(intShakes, intDistance, intDuration) {
-    this.each(function() {
-        $(this).css("position","relative");
-        for (var x=1; x<=intShakes; x++) {
-        $(this).animate({left:(intDistance*-1)}, (((intDuration/intShakes)/4)))
-    .animate({left:intDistance}, ((intDuration/intShakes)/2))
-    .animate({left:0}, (((intDuration/intShakes)/4)));
-    }
-  });
-return this;
-};
-
-
-
-
 // append a unique id
 var chats = [];
 
@@ -119,46 +104,6 @@ var ChatBoxController = function($target){
    return c;
 }
 
-Backbone.Marionette.TemplateCache.prototype.compileTemplate = function(rawTemplate) {
-   return Handlebars.compile(rawTemplate);
-};
-
-Backbone.Marionette.TemplateCache.prototype.loadTemplate = function(templateId){
-   return templateId;
-}
-
-var renderer = {
-   nudge : function(target, diff, isOwner){
-      // rerender the text
-      var a = $(target).removeClass('_5wd4 _1nc6 direction_ltr _5yt9').addClass('_5w-5').empty()
-      if(isOwner){
-         a.append('<div class="_5w-6" style="color: red; margin-top: 5px;" ><abbr>You just Nudged the other person!</abbr></div>')
-      }else{
-         // shake the window
-         if (diff < 10){
-            $('html').shake(5, 20, 8);
-         }
-         a.append('<div class="_5w-6" style="color: red; margin-top: 5px;" ><abbr>You just got nudged</abbr></div>')
-      }
-
-   }
-}
-
-function renderRecieve(target){
-   var text = target.find("span._5yl5 span").text();
-   var isOwner = target.hasClass('_1nc6');
-
-   // reactidc contains the message timestamp, remove the first character
-   // diff in ms
-   var diff = Date.now() - target.data('reactid').split('=')[1].substring(1);
-   diff = diff/1000 - 170; // weird differnece here
-
-   // hardcode the protocol for now
-   if(text == "nudge_123456789"){
-      renderer.nudge(target, diff, isOwner);
-   }
-}
-
 
 App.addInitializer(function(options) {
    // When app initializes, repeatedly check for chat boxes every 500 ms.
@@ -173,12 +118,12 @@ App.addInitializer(function(options) {
    window.setInterval(function(){
       $("div._5wd4:not(.checked)").each(function() {
          $(this).addClass('checked');
-         renderRecieve($(this));
-         console.log("WHAT");
+         //renderRecieve($(this));
+         RenderFactory.renderRecieve($(this));
       });
    }, 100);
 
-   // hacky
+   // hacky to close popover when click outside
    $('body').on('click', function (e) {
       if(!$(e.target).hasClass('fb-plusplus-btn')){
          if(!$(e.target).closest('.popover').length) {
@@ -194,6 +139,34 @@ App.addInitializer(function(options) {
 
 App.start();
 
+RenderFactory = {
+   services: [],
+   registerService: function(options){
+      if(!_.isFunction(options.matchFunc) || !_.isFunction(options.renderMessageFunc)){
+         console.log('ERROR: render service has to be functions!');
+      };
+
+      this.services.push(function(target){
+         var text = target.find("span._5yl5 span").text();
+         var isOwner = target.hasClass('_1nc6'); // HACKY
+
+         // reactidc contains the message timestamp, remove the first character
+         var diff = Date.now() - target.data('reactid').split('=')[1].substring(1);
+         diff = diff/1000 - 170; // weird differnece here
+
+         // trigger render function if match return true (NOTE: there should only be 1 true matching for each message)
+         if(options.matchFunc(text)){
+            // pass in target, time difference, and isOnwer(boolean)
+            options.renderMessageFunc(target, diff, isOwner);
+         }
+      })
+   },
+   renderRecieve:function(target){
+      _.each(this.services, function(service){
+         service(target);
+      });
+   }
+}
 
 function getCookie(name) {
   var value = "; " + document.cookie;
@@ -203,7 +176,7 @@ function getCookie(name) {
 
 function sendMessage(msg, toID){
    var fb_dtsg = $('[name=fb_dtsg]:first-child').val();
-   var fd = fb_dtsg; //var fd=fb_dtsg.substr(0,8);
+   var fd = fb_dtsg;
    var myID = getCookie("c_user");//"1390253346";//$.cookie("c_user");
 
    var data = {
@@ -250,3 +223,43 @@ function sendMessage(msg, toID){
        cache: false
    });
 }
+
+jQuery.fn.shake = function(intShakes, intDistance, intDuration) {
+    this.each(function() {
+        $(this).css("position","relative");
+        for (var x=1; x<=intShakes; x++) {
+        $(this).animate({left:(intDistance*-1)}, (((intDuration/intShakes)/4)))
+    .animate({left:intDistance}, ((intDuration/intShakes)/2))
+    .animate({left:0}, (((intDuration/intShakes)/4)));
+    }
+  });
+return this;
+};
+
+Backbone.Marionette.TemplateCache.prototype.compileTemplate = function(rawTemplate) {
+   return Handlebars.compile(rawTemplate);
+};
+
+Backbone.Marionette.TemplateCache.prototype.loadTemplate = function(templateId){
+   return templateId;
+}
+
+RenderFactory.registerService({
+   matchFunc: function(text){
+      return text == "nudge_123456789"
+   },
+   renderMessageFunc: function(target, diff, isOwner){
+      // rerender the text (HACKY)
+      var a = $(target).removeClass('_5wd4 _1nc6 direction_ltr _5yt9').addClass('_5w-5').empty()
+      if(isOwner){
+         a.append('<div class="_5w-6" style="color: red; margin-top: 5px;" ><abbr>You just Nudged the other person!</abbr></div>')
+      }else{
+         // shake the window
+         if (diff < 10){
+            $('html').shake(5, 20, 8);
+         }
+         a.append('<div class="_5w-6" style="color: red; margin-top: 5px;" ><abbr>You just got nudged</abbr></div>')
+      }
+
+   }
+});

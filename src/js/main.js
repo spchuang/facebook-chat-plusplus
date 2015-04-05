@@ -1,6 +1,5 @@
 var App = new Backbone.Marionette.Application();
 
-
 // append a unique id
 var chats = [];
 
@@ -52,39 +51,6 @@ var ChatBoxController = function($target){
    return c;
 }
 
-var renderer = {
-   nudge : function(target, diff, isOwner){
-      // rerender the text
-      var a = $(target).removeClass('_5wd4 _1nc6 direction_ltr _5yt9').addClass('_5w-5').empty()
-      if(isOwner){
-         a.append('<div class="_5w-6" style="color: red; margin-top: 5px;" ><abbr>You just Nudged the other person!</abbr></div>')
-      }else{
-         // shake the window
-         if (diff < 10){
-            $('html').shake(5, 20, 8);
-         }
-         a.append('<div class="_5w-6" style="color: red; margin-top: 5px;" ><abbr>You just got nudged</abbr></div>')
-      }
-
-   }
-}
-
-function renderRecieve(target){
-   var text = target.find("span._5yl5 span").text();
-   var isOwner = target.hasClass('_1nc6');
-
-   // reactidc contains the message timestamp, remove the first character
-   // diff in ms
-   var diff = Date.now() - target.data('reactid').split('=')[1].substring(1);
-   diff = diff/1000 - 170; // weird differnece here
-
-   // hardcode the protocol for now
-   if(text == "nudge_123456789"){
-      renderer.nudge(target, diff, isOwner);
-   }
-}
-
-
 App.addInitializer(function(options) {
    // When app initializes, repeatedly check for chat boxes every 500 ms.
    window.setInterval(function() {
@@ -98,7 +64,8 @@ App.addInitializer(function(options) {
    window.setInterval(function(){
       $("div._5wd4:not(.checked)").each(function() {
          $(this).addClass('checked');
-         renderRecieve($(this));
+         //renderRecieve($(this));
+         RenderFactory.renderRecieve($(this));
       });
    }, 100);
 
