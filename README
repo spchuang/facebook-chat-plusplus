@@ -1,16 +1,12 @@
 Facebook-chat-plusplus
 
-This is a chrome extension that adds new features on to of Facebook's messanger.
+This is a chrome extension that adds three features on to of Facebook's messanger.
 
-How to install
------------------
-> download the code
-> open Window > Extensions
-> click "load unpacked extension..."
-> choose the folder of where this extension is located
-> extension should show up on the top right of the extension icons
+A pop-up will appear when the FBchat++ icon is clicked in facebook chatboxes with three options. 
+
+> "Nudge" feature will let users send a nudge, shaking others' screens.
+> "Stickers" feature will let users search for stickers and send the gif to other users.
+> "Encrypt" feature will let users send encrypted messages to each other, which will not be understood by others and even Facebook. The messages can only be decrypted by using the password set by the users.
 
 
-Install grunt
-----------------
-npm install grunt --save-dev
+
