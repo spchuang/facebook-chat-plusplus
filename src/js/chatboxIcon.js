@@ -9,12 +9,12 @@ var contentTpl = '<div class="stickers hidden"><span><img class="back-btn" heigh
 
 var popOverTpl = tabTpl + contentTpl;
 
-function populateStickers(data, cb){
+function populateStickers(data){
    var stickersEl = $("#stickerCont");
    for(var i = 0; i<data['data'].length;i++){
       stickersEl.append("<img src=\""+ chrome.extension.getURL("icons/spinning-wheel.gif") + "\" data-src=\""+data['data'][i]['images']['fixed_height_downsampled']['url']+"\" data=\"" + data['data'][i]['images']['original']['url'] + "\"height=\"50\" width=\"50\">");
    }
-   $("img").unveil();
+
    $("#stickerCont").on("click", "img", function(){
 
       url = $(this).attr('data');
@@ -26,7 +26,7 @@ function populateStickers(data, cb){
       });
       //$(this).closest('.fbNubFlyoutInner').find('textarea').val(url);
    });
-   cb();
+   $("img").unveil(100);
 }
 trending = [];
 chrome.extension.onMessage.addListener(function(message, sender, sendResponse) {
@@ -35,17 +35,13 @@ chrome.extension.onMessage.addListener(function(message, sender, sendResponse) {
                $(".loading").remove();
                console.log("search results:");
                console.log(message.result);
-               populateStickers(message.result, function(){
-                  $("img").unveil(100);
-               });
+               populateStickers(message.result);
                break;
             case "trendingResult":
                $(".loading").remove();
                console.log("trending results:");
                console.log(message.result);
-               populateStickers(message.result,function(){
-                  $("img").unveil(100);
-               });
+               populateStickers(message.result);
                break;
         }
 });
