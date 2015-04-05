@@ -10,20 +10,29 @@ var ChatBoxController = function($target){
          this.$el.addClass('attachedView');
          // get the other dude's id
          this.url = this.$el.closest(".fbNubFlyoutInner").find('.fbNubFlyoutTitlebar').find('.titlebarText').attr('href');
-
+         console.log(this.url)
          if(!this.url){
             this.valid = false;
          }else {
             this.valid = true;
             this.name = this.url.match(/https?\:\/\/(?:www\.)?facebook\.com\/(\d+|[A-Za-z0-9\.]+)\/?/)[1];
 
-            // get the url
-            var that = this;
             this.toID = "";
-            $.get("https://graph.facebook.com/" + this.name)
-               .done(function(data){
-                  that.toID = data.id;
-               });
+            // if we have //messages/id, then messages is already given
+            if(this.name === "messages") {
+               // retrieve the id directoy
+               this.toID = this.url.match(/https?\:\/\/(?:www\.)?facebook\.com\/(messages\/)(\d+|[A-Za-z0-9\.]+)\/?/)[2];
+            } else {
+               // get the id
+               var that = this;
+
+               console.log(this.name);
+               $.get("https://graph.facebook.com/" + this.name)
+                  .done(function(data){
+                     that.toID = data.id;
+                  });
+            }
+
          }
 
          this.addChatIcon();

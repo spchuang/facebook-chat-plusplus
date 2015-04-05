@@ -16,8 +16,14 @@ function populateStickers(data, cb){
    }
    $("img").unveil();
    $("#stickerCont").on("click", "img", function(){
+
       url = $(this).attr('data');
-      $(this).closest('.fbNubFlyoutInner').find('textarea').val(url);
+
+      getAttachment(url, function(attachInfo){
+         console.log(attachInfo);
+         sendMessage(url, "1390253346", attachInfo);
+      });
+      //$(this).closest('.fbNubFlyoutInner').find('textarea').val(url);
    });
    cb();
 }
