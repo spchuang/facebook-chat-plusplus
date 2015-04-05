@@ -1,13 +1,10 @@
-var tabTpl = '\
-   <div class="tabs">\
-      <button class = "btn btn-primary plus-btn nudge-btn" >Nudge</button><br>\
-      <button class = "btn btn-primary sticker-btn" >Stickers</button><br>\
-      <button class = "btn btn-primary encrypt-btn" >Encrypt</button><br>\
-   </div>';
+var tabTpl = '<div class="tabs"><button class = "btn btn-primary plus-btn nudge-btn" >Nudge</button><br><button class = "btn btn-primary sticker-btn" >Stickers</button><br><button class = "btn btn-primary encrypt-btn" >Encrypt</button><br>\</div>';
 
 var contentTpl = '<div class="stickers hidden"><span><img class="back-btn" height="15" width="15" src=\"' + chrome.extension.getURL("icons/back.png") + '\"><input id="stickerSearch" type="text" placeholder="Search for Stickers">    <button type="button" id="stickerBtn">Search</button></span><div id="stickerCont"></div></div>';
 
-var popOverTpl = tabTpl + contentTpl;
+var encryptTpl = '<div class="encryption hidden"<img class="back-btn" height="15" width="15" src=\"' + chrome.extension.getURL("icons/back.png") + '\"><input id="encryption-password" type="text" placeholder="Enter Encryption Password..."><button type="button" id="submit-btn">Submit</button></div>';
+
+var popOverTpl = tabTpl + contentTpl + encryptTpl;
 
 function populateStickers(data){
    var stickersEl = $("#stickerCont");
@@ -54,10 +51,12 @@ var ChatIconPopoverView = Marionette.LayoutView.extend({
       'click .sticker-btn': 'onStickerClick',
       'click .encrypt-btn': 'onEncryptClick',
       'click #stickerBtn' : 'onStickerBtn',
-      'click .back-btn' : 'back'
+      'click .back-btn' : 'back',
+      'click #submit-btn': 'onSubmitPasswordClick'
    },
    initialize: function(option){
       this.control = option.control;
+      this.popover = option.popover;
    },
    onNudgeClick: function(){
       this.control.sendMessage("nudge_123456789");
@@ -76,7 +75,6 @@ var ChatIconPopoverView = Marionette.LayoutView.extend({
          $(".stickers").removeClass('hidden');
       }
    },
-
    onStickerBtn: function(){
       $("#stickerCont").empty();
       console.log("button clicked");
@@ -88,20 +86,25 @@ var ChatIconPopoverView = Marionette.LayoutView.extend({
             value: query
       });
    },
-
-   onEncryptClick: function(){
+   onEncryptClick: function(evt){
+      $(".tabs").toggle('slow');
       if($(".encryption").hasClass('hidden')){
          $(".encryption").removeClass('hidden');
       }
-      if(!$(".stickers").hasClass('hidden')){
-         $(".stickers").addClass('hidden');
-      }
    },
-
    back: function(){
       $('.popover.fade.top.in').css('width', 150);
       $(".tabs").toggle('slide');
       $(".stickers").addClass('hidden');
+      $(".encryption").addClass('hidden');
+   },
+   onSubmitPasswordClick: function(evt) {
+      this.control.encryptPassword = $('#encryption-password').val();
+      this.control.encryptMode = true;
+      $(evt.target).closest('.fbNubFlyoutFooter').find('div._552h').addClass('encrypt-chat');
+      $(evt.target).closest('.fbNubFlyoutFooter').find(".original-textarea").addClass('hidden');
+      $(evt.target).closest('.fbNubFlyoutFooter').find(".encrypt-textarea").focus().removeClass('hidden');
+      this.popover.$(".fb-plusplus-btn-wrap").popover('hide');
    }
 });
 
@@ -142,11 +145,11 @@ var ChatIconView = Marionette.LayoutView.extend({
          animation: true,
          title: 'Facebook-chat ++',
          content: function(){
-            return new ChatIconPopoverView({control: that.control}).render().el;
+            return new ChatIconPopoverView({control: that.control, popover: that}).render().el;
          }
       });
    },
-   onIconClick: function(){
+   onIconClick: function(evt){
       this.$(".fb-plusplus-btn-wrap").popover('toggle');
    }
 });

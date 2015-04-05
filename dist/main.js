@@ -1,14 +1,11 @@
 /*! facebook-chat-plusplus - v0.1.0 - */
-var tabTpl = '\
-   <div class="tabs">\
-      <button class = "btn btn-primary plus-btn nudge-btn" >Nudge</button><br>\
-      <button class = "btn btn-primary sticker-btn" >Stickers</button><br>\
-      <button class = "btn btn-primary encrypt-btn" >Encrypt</button><br>\
-   </div>';
+var tabTpl = '<div class="tabs"><button class = "btn btn-primary plus-btn nudge-btn" >Nudge</button><br><button class = "btn btn-primary sticker-btn" >Stickers</button><br><button class = "btn btn-primary encrypt-btn" >Encrypt</button><br>\</div>';
 
 var contentTpl = '<div class="stickers hidden"><span><img class="back-btn" height="15" width="15" src=\"' + chrome.extension.getURL("icons/back.png") + '\"><input id="stickerSearch" type="text" placeholder="Search for Stickers">    <button type="button" id="stickerBtn">Search</button></span><div id="stickerCont"></div></div>';
 
-var popOverTpl = tabTpl + contentTpl;
+var encryptTpl = '<div class="encryption hidden"<img class="back-btn" height="15" width="15" src=\"' + chrome.extension.getURL("icons/back.png") + '\"><input id="encryption-password" type="text" placeholder="Enter Encryption Password..."><button type="button" id="submit-btn">Submit</button></div>';
+
+var popOverTpl = tabTpl + contentTpl + encryptTpl;
 
 function populateStickers(data){
    var stickersEl = $("#stickerCont");
@@ -55,10 +52,12 @@ var ChatIconPopoverView = Marionette.LayoutView.extend({
       'click .sticker-btn': 'onStickerClick',
       'click .encrypt-btn': 'onEncryptClick',
       'click #stickerBtn' : 'onStickerBtn',
-      'click .back-btn' : 'back'
+      'click .back-btn' : 'back',
+      'click #submit-btn': 'onSubmitPasswordClick'
    },
    initialize: function(option){
       this.control = option.control;
+      this.popover = option.popover;
    },
    onNudgeClick: function(){
       this.control.sendMessage("nudge_123456789");
@@ -77,7 +76,6 @@ var ChatIconPopoverView = Marionette.LayoutView.extend({
          $(".stickers").removeClass('hidden');
       }
    },
-
    onStickerBtn: function(){
       $("#stickerCont").empty();
       console.log("button clicked");
@@ -89,20 +87,25 @@ var ChatIconPopoverView = Marionette.LayoutView.extend({
             value: query
       });
    },
-
-   onEncryptClick: function(){
+   onEncryptClick: function(evt){
+      $(".tabs").toggle('slow');
       if($(".encryption").hasClass('hidden')){
          $(".encryption").removeClass('hidden');
       }
-      if(!$(".stickers").hasClass('hidden')){
-         $(".stickers").addClass('hidden');
-      }
    },
-
    back: function(){
       $('.popover.fade.top.in').css('width', 150);
       $(".tabs").toggle('slide');
       $(".stickers").addClass('hidden');
+      $(".encryption").addClass('hidden');
+   },
+   onSubmitPasswordClick: function(evt) {
+      this.control.encryptPassword = $('#encryption-password').val();
+      this.control.encryptMode = true;
+      $(evt.target).closest('.fbNubFlyoutFooter').find('div._552h').addClass('encrypt-chat');
+      $(evt.target).closest('.fbNubFlyoutFooter').find(".original-textarea").addClass('hidden');
+      $(evt.target).closest('.fbNubFlyoutFooter').find(".encrypt-textarea").focus().removeClass('hidden');
+      this.popover.$(".fb-plusplus-btn-wrap").popover('hide');
    }
 });
 
@@ -143,11 +146,11 @@ var ChatIconView = Marionette.LayoutView.extend({
          animation: true,
          title: 'Facebook-chat ++',
          content: function(){
-            return new ChatIconPopoverView({control: that.control}).render().el;
+            return new ChatIconPopoverView({control: that.control, popover: that}).render().el;
          }
       });
    },
-   onIconClick: function(){
+   onIconClick: function(evt){
       this.$(".fb-plusplus-btn-wrap").popover('toggle');
    }
 });
@@ -166,7 +169,6 @@ var ChatBoxController = function($target){
          this.$el.attr('id', 'chat-'+this.id);
          // get the other dude's id
          this.url = this.$el.closest(".fbNubFlyoutInner").find('.fbNubFlyoutTitlebar').find('.titlebarText').attr('href');
-         console.log(this.url)
          if(!this.url){
             this.valid = false;
          }else {
@@ -190,26 +192,55 @@ var ChatBoxController = function($target){
             }
 
          }
-
+         this.encryptMode = false;
+         this.encryptPassword = "test";
          this.addChatIcon();
+         this.addEncryptTextBox();
       },
       addChatIcon: function(){
          this.icon = new ChatIconView({control: this});
          this.icon.render();
          this.$el.append(this.icon.el);
       },
+      addEncryptTextBox: function(){
+         //Append encrypt textarea next to original 
+         var that = this;
+         this.$el.closest(".fbNubFlyoutInner").find('textarea').addClass('original-textarea');
+         this.$el.closest(".fbNubFlyoutInner").find('div._552h').append('<textarea class="uiTextareaAutogrow _552m encrypt-textarea hidden" style="height: 12px;"></textarea>');
+         //Bind jquery events to textbox
+         this.$el.closest(".fbNub").click(function() {
+            if(that.encryptMode) {
+               $(this).find(".encrypt-textarea").focus();
+            }
+         });
+         this.$el.closest(".fbNubFlyoutInner").find('.encrypt-textarea').keydown(function(e){
+            if(e.which == 13 && that.encryptMode) {
+               //Enter is pressed
+               var msg = encryptText($(this).val(), that.encryptPassword);
+               that.sendMessage(msg);
+               $(this).val('');
+            } else if(e.which == 27){
+               //ESC is pressed
+               that.encryptMode = false;
+               $(this).closest('div._552h').removeClass('encrypt-chat');
+               $(this).closest('div._552h').find(".encrypt-textarea").addClass('hidden');
+               $(this).closest('div._552h').find(".original-textarea").removeClass('hidden');               
+            }
+         });
+      },
       sendMessage: function(msg, attachInfo){
          this.icon.showLoading();
-
          if(!this.valid){
             console.log("THIS IS INVALID");
             return;
          }
 
+
          if(!this.toID){
             console.log("NO ID");
             return;
          }
+
          var that = this;
          var promise = sendMessage(msg, this.toID, attachInfo);
          promise.always(function(){
@@ -223,6 +254,25 @@ var ChatBoxController = function($target){
 
 function getChatBoxController(id){
    return chats[id];
+}
+
+function encryptText(text, password){
+   if (password == null) {
+      console.log("encryptPassword is null, error!");
+      return null;
+   }
+   var encrypted = CryptoJS.AES.encrypt(text, password);
+   return "encrypt_123456789\n\n" + encrypted.toString();
+}
+
+function decryptText(ciphertext, password){
+   if (password == null) {
+      console.log("decryptPassword is null, error!");
+      return null;
+   }   
+
+   var decrypted = CryptoJS.AES.decrypt(ciphertext, password);
+   return decrypted.toString(CryptoJS.enc.Utf8);
 }
 
 App.addInitializer(function(options) {
@@ -253,7 +303,6 @@ App.addInitializer(function(options) {
           }
       }
    });
-
 });
 
 
@@ -487,6 +536,31 @@ Backbone.Marionette.TemplateCache.prototype.compileTemplate = function(rawTempla
 Backbone.Marionette.TemplateCache.prototype.loadTemplate = function(templateId){
    return templateId;
 }
+
+RenderFactory.registerService({
+   matchFunc: function(text){
+      return text.substr(0, 19) == "encrypt_123456789\n\n"
+   },
+   renderMessageFunc: function(target, diff, isOwner){
+      target = target.find("span._5yl5 span");
+      var text = target.text();
+      $(target).empty().append('<a href="#">Encrypted Message</a><span class="encrypted-text" hidden>' + text.substr(19) + '</span>')
+         
+      $(target).find('a').on('click', function(){
+         var ciphertext = $(this).closest('._5wd4').find('.encrypted-text').text();
+         console.log(ciphertext);
+         var password = prompt("Please enter the decrypt password", "");
+         if (password) {
+            var text = decryptText(ciphertext, password);
+            if (text) {
+               $(this).parent().empty().text(text);
+            } else {
+               alert("Wrong decryption password provided!");
+            }
+         }
+      });
+   }
+});
 
 RenderFactory.registerService({
    matchFunc: function(text){
