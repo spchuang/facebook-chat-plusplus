@@ -17,3 +17,15 @@
 .fb-plusplus-wrap .fb-plusplus-btn-wrap img:hover {
   opacity: 1;
 }
+.popover.fade.top.in {
+  width: 250px;
+  height: 200px;
+  overflow: hidden;
+}
+.stickers {
+  overflow-y: auto;
+  height: 130px;
+}
+.hidden {
+  visibilitiy: hidden;
+}
