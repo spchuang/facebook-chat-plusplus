@@ -30,15 +30,7 @@ var ChatIconView = Marionette.LayoutView.extend({
       }
    },
    onRender: function(){
-      /*
-      this.$('.fb-plusplus-btn').webuiPopover({
-         title:'Facebook-chat ++',
-         content: function(){
-            return new ChatIconPopoverView().render().el;
-         },
-         placement:'top'
-      });*/
-      console.log(this.$(".fb-plusplus-btn"));
+
       this.$(".fb-plusplus-btn-wrap").popover({
          trigger: 'manual',
          placement: 'top',
