@@ -1,13 +1,15 @@
 var App = new Backbone.Marionette.Application();
 
 // append a unique id
-var chats = [];
+var chats = {};
 
 var ChatBoxController = function($target){
    var c = {
+      id: guid(),
       $el: $target,
       initialize: function(){
          this.$el.addClass('attachedView');
+         this.$el.attr('id', 'chat-'+this.id);
          // get the other dude's id
          this.url = this.$el.closest(".fbNubFlyoutInner").find('.fbNubFlyoutTitlebar').find('.titlebarText').attr('href');
          console.log(this.url)
@@ -42,7 +44,7 @@ var ChatBoxController = function($target){
          this.icon.render();
          this.$el.append(this.icon.el);
       },
-      sendMessage: function(msg){
+      sendMessage: function(msg, attachInfo){
          if(!this.valid){
             console.log("THIS IS INVALID");
             return;
@@ -53,11 +55,15 @@ var ChatBoxController = function($target){
             return;
          }
 
-         sendMessage(msg, this.toID);
+         sendMessage(msg, this.toID, attachInfo);
       }
    }
    c.initialize();
    return c;
+}
+
+function getChatBoxController(id){
+   return chats[id];
 }
 
 App.addInitializer(function(options) {
@@ -65,7 +71,7 @@ App.addInitializer(function(options) {
    window.setInterval(function() {
        $("div.fbNubFlyoutFooter:not(.attachedView)").each(function() {
          var c = ChatBoxController($(this));
-         chats.push(c);
+         chats[c.id] = c;
        });
    }, 300);
 

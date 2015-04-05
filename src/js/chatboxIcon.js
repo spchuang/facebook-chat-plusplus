@@ -18,10 +18,11 @@ function populateStickers(data, cb){
    $("#stickerCont").on("click", "img", function(){
 
       url = $(this).attr('data');
-
+      var that = this;
       getAttachment(url, function(attachInfo){
-         console.log(attachInfo);
-         sendMessage(url, "1390253346", attachInfo);
+         var id = $(that).closest('.fbNubFlyoutFooter').attr('id').replace("chat-", "");
+         var c = getChatBoxController(id);
+         c.sendMessage(url, attachInfo);
       });
       //$(this).closest('.fbNubFlyoutInner').find('textarea').val(url);
    });
