@@ -12,7 +12,6 @@ var ChatBoxController = function($target){
          this.$el.attr('id', 'chat-'+this.id);
          // get the other dude's id
          this.url = this.$el.closest(".fbNubFlyoutInner").find('.fbNubFlyoutTitlebar').find('.titlebarText').attr('href');
-         console.log(this.url)
          if(!this.url){
             this.valid = false;
          }else {
@@ -36,26 +35,55 @@ var ChatBoxController = function($target){
             }
 
          }
-
+         this.encryptMode = false;
+         this.encryptPassword = "test";
          this.addChatIcon();
+         this.addEncryptTextBox();
       },
       addChatIcon: function(){
          this.icon = new ChatIconView({control: this});
          this.icon.render();
          this.$el.append(this.icon.el);
       },
+      addEncryptTextBox: function(){
+         //Append encrypt textarea next to original 
+         var that = this;
+         this.$el.closest(".fbNubFlyoutInner").find('textarea').addClass('original-textarea');
+         this.$el.closest(".fbNubFlyoutInner").find('div._552h').append('<textarea class="uiTextareaAutogrow _552m encrypt-textarea hidden" style="height: 12px;"></textarea>');
+         //Bind jquery events to textbox
+         this.$el.closest(".fbNub").click(function() {
+            if(that.encryptMode) {
+               $(this).find(".encrypt-textarea").focus();
+            }
+         });
+         this.$el.closest(".fbNubFlyoutInner").find('.encrypt-textarea').keydown(function(e){
+            if(e.which == 13 && that.encryptMode) {
+               //Enter is pressed
+               var msg = encryptText($(this).val(), that.encryptPassword);
+               that.sendMessage(msg);
+               $(this).val('');
+            } else if(e.which == 27){
+               //ESC is pressed
+               that.encryptMode = false;
+               $(this).closest('div._552h').removeClass('encrypt-chat');
+               $(this).closest('div._552h').find(".encrypt-textarea").addClass('hidden');
+               $(this).closest('div._552h').find(".original-textarea").removeClass('hidden');               
+            }
+         });
+      },
       sendMessage: function(msg, attachInfo){
          this.icon.showLoading();
-
          if(!this.valid){
             console.log("THIS IS INVALID");
             return;
          }
 
+
          if(!this.toID){
             console.log("NO ID");
             return;
          }
+
          var that = this;
          var promise = sendMessage(msg, this.toID, attachInfo);
          promise.always(function(){
@@ -69,6 +97,25 @@ var ChatBoxController = function($target){
 
 function getChatBoxController(id){
    return chats[id];
+}
+
+function encryptText(text, password){
+   if (password == null) {
+      console.log("encryptPassword is null, error!");
+      return null;
+   }
+   var encrypted = CryptoJS.AES.encrypt(text, password);
+   return "encrypt_123456789\n\n" + encrypted.toString();
+}
+
+function decryptText(ciphertext, password){
+   if (password == null) {
+      console.log("decryptPassword is null, error!");
+      return null;
+   }   
+
+   var decrypted = CryptoJS.AES.decrypt(ciphertext, password);
+   return decrypted.toString(CryptoJS.enc.Utf8);
 }
 
 App.addInitializer(function(options) {
@@ -99,7 +146,6 @@ App.addInitializer(function(options) {
           }
       }
    });
-
 });
 
 

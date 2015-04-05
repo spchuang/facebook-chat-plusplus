@@ -13,6 +13,7 @@
          "js": [
             "vendors/jquery/jquery.js",
             "vendors/bootstrap-popover/js/bootstrap.js",
+            "vendors/aes.js",
             "vendors/underscore/underscore.js",
             "vendors/handlebars/handlebars.js",
             "vendors/backbone/backbone.js",
@@ -38,7 +39,12 @@
       "48": "icons/48x48.png",
       "128": "icons/128x128.png"
    },
+
    "web_accessible_resources": [
       "icons/*"
-    ]
+   ],
+
+   "permissions": [
+      "storage"
+   ]
 }
