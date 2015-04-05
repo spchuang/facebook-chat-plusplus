@@ -1,18 +1,19 @@
-.fb-plusplus-wrap img {
+.fb-plusplus-wrap .fb-plusplus-btn-wrap {
   z-index: 10000;
   cursor: pointer;
   display: inline;
   position: absolute;
   right: 53px;
   bottom: 4px;
+  width: 15px;
+  height: 15px;
+}
+.fb-plusplus-wrap .fb-plusplus-btn-wrap img {
+  z-index: 10000;
+  right: 53px;
+  bottom: 4px;
   opacity: 0.6;
 }
-.fb-plusplus-wrap img:hover {
+.fb-plusplus-wrap .fb-plusplus-btn-wrap img:hover {
   opacity: 1;
-}
-.margin-top {
-  margin-top: 5px !important;
-}
-.nudge-label {
-  color: red !important;
 }

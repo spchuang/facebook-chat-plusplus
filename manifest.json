@@ -5,11 +5,13 @@
    "content_scripts": [
       {
          "css": [
+            "vendors/bootstrap-popover/css/bootstrap.css",
             "vendors/webui-popover/jquery.webui-popover.css",
             "dist/main.css"
          ],
          "js": [
             "vendors/jquery/jquery.js",
+            "vendors/bootstrap-popover/js/bootstrap.js",
             "vendors/underscore/underscore.js",
             "vendors/handlebars/handlebars.js",
             "vendors/backbone/backbone.js",

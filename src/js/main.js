@@ -25,12 +25,6 @@ return this;
 // append a unique id
 var chats = [];
 
-App.module("chatBox", function(chatBox, App, Backbone, Marionette, $, _){
-
-
-});
-
-
 var ChatBoxController = function($target){
    var c = {
       $el: $target,
@@ -59,17 +53,13 @@ Backbone.Marionette.TemplateCache.prototype.loadTemplate = function(templateId){
 var renderer = {
    nudge : function(target, diff){
       // shake the window
-      //console.log(diff);
-
       if (diff < 10){
          $('body').shake(5, 15, 5);
       }
 
-      $(target).closest('._5wd4').removeClass('_5wd4 _1nc6 direction_ltr _5yt9').
-         addClass('_5w-5 margin-top nudge-label').empty().append('<div class="_5w-6" ><abbr>You just got nudged</abbr></div>')
-
-      //$(target).text('You just got nudged!');
-      // rerender
+      // rerender the text
+      $(target).closest('._5wd4').removeClass('_5wd4 _1nc6 direction_ltr _5yt9').addClass('_5w-5').empty()
+         .append('<div class="_5w-6" style="color: red; margin-top: 5px;" ><abbr>You just got nudged</abbr></div>')
    }
 }
 
@@ -79,7 +69,6 @@ function renderRecieve(target){
    // diff in ms
    var diff = Date.now() - target.data('reactid').split('=')[1].substring(1);
    diff = diff/1000 - 170; // weird differnece here
-//   console.log(target.data('reactid').split('=')[1] + " " + Date.now());
 
    // hardcode the protocol for now
    if(text == "nudge_123456789"){
@@ -92,10 +81,10 @@ App.addInitializer(function(options) {
    // When app initializes, repeatedly check for chat boxes every 500 ms.
    window.setInterval(function() {
        $("div.fbNubFlyoutFooter:not(.attachedView)").each(function() {
-          var c = ChatBoxController($(this));
+         var c = ChatBoxController($(this));
          chats.push(c);
        });
-   }, 500);
+   }, 300);
 
    // listen to new messages, redirect to appropriate renderer
    window.setInterval(function(){
@@ -103,8 +92,19 @@ App.addInitializer(function(options) {
          $(this).addClass('checked');
          renderRecieve($(this));
       });
-
    }, 100);
+
+   // hacky
+   $('body').on('click', function (e) {
+      if(!$(e.target).hasClass('fb-plusplus-btn')){
+         if(!$(e.target).closest('.popover').length) {
+              $('.popover').each(function(){
+                 $(this).parent().popover('hide');
+              });
+          }
+      }
+   });
+
 });
 
 
