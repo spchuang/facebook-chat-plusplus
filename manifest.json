@@ -2,7 +2,7 @@
    "name": "Facebook-chat-plusplus",
    "update_url": "https://clients2.google.com/service/update2/crx",
    "short_name": "FBchat++",
-   "version": "0.1.0",
+   "version": "0.1.1",
    "manifest_version": 2,
    "content_scripts": [
       {
