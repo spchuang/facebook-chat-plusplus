@@ -53,13 +53,14 @@ function sendMessage(msg, toID, attachInfo){
    }
 
 
-   $.ajax({
+   var promise = $.ajax({
        type: "POST",
        url: "https://www.facebook.com/ajax/mercury/send_messages.php",
        data: $.param(data),
        dataType: "json",
        cache: false
    });
+   return promise;
 }
 
 function getAttachment(url, callback){

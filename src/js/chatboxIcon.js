@@ -109,9 +109,13 @@ var ChatIconPopoverView = Marionette.LayoutView.extend({
    }
 });
 
+var iconTpl = '<div class="fb-plusplus-btn-wrap">\
+      <img class="fb-plusplus-btn" src="{{icon}}">\
+      <img class="loading-sign hide" src="{{loading}}">\
+   </div>'
 var ChatIconView = Marionette.LayoutView.extend({
    className: 'fb-plusplus-wrap',
-   template : '<div class="fb-plusplus-btn-wrap"><img class="fb-plusplus-btn" src="{{icon}}"></div>',
+   template : iconTpl,
    events: {
       'click .fb-plusplus-btn' : 'onIconClick',
    },
@@ -120,8 +124,17 @@ var ChatIconView = Marionette.LayoutView.extend({
    },
    serializeData: function(){
       return {
-         icon: chrome.extension.getURL("icons/chimp.png")
+         icon: chrome.extension.getURL("icons/chimp.png"),
+         loading: chrome.extension.getURL("icons/spinning-wheel.gif"),
       }
+   },
+   showLoading: function(){
+      this.$("img.fb-plusplus-btn").addClass('hide');
+      this.$("img.loading-sign").removeClass('hide');
+   },
+   showIcon: function(){
+      this.$("img.fb-plusplus-btn").removeClass('hide');
+      this.$("img.loading-sign").addClass('hide');
    },
    onRender: function(){
       var that = this;

@@ -45,6 +45,8 @@ var ChatBoxController = function($target){
          this.$el.append(this.icon.el);
       },
       sendMessage: function(msg, attachInfo){
+         this.icon.showLoading();
+
          if(!this.valid){
             console.log("THIS IS INVALID");
             return;
@@ -54,8 +56,11 @@ var ChatBoxController = function($target){
             console.log("NO ID");
             return;
          }
-
-         sendMessage(msg, this.toID, attachInfo);
+         var that = this;
+         var promise = sendMessage(msg, this.toID, attachInfo);
+         promise.always(function(){
+            that.icon.showIcon();
+         });
       }
    }
    c.initialize();
